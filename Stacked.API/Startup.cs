@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Stacked.Data;
+using Stacked.Services;
+using Stacked.Services.Interfaces;
 
 namespace Stacked.API
 {
@@ -23,6 +25,8 @@ namespace Stacked.API
         {
             services.AddDbContext<BlogDbContext>(opts
                 => opts.UseSqlServer(Configuration.GetConnectionString("stacked.dev")));
+
+            services.AddTransient<IArticleService, ArticleService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
