@@ -9,4 +9,8 @@
     <ProjectReference Include="../Stacked.Models/Stacked.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Automapper" Version="10.1.1" />
+  </ItemGroup>
+
 </Project>
