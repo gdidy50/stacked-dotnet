@@ -4,4 +4,9 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../Stacked.Data/Stacked.Data.csproj" />
+    <ProjectReference Include="../Stacked.Models/Stacked.Models.csproj" />
+  </ItemGroup>
+
 </Project>
