@@ -10,7 +10,7 @@ using Stacked.Services.Interfaces;
 namespace Stacked.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/article")]
     public class ArticleController : ControllerBase
     {
         private readonly ILogger<ArticleController> _logger;
@@ -61,7 +61,7 @@ namespace Stacked.API.Controllers
 
                 if (article.Error != null)
                 {
-                    _logger.LogError($"Error retrieving Article: {article.Error}");
+                    _logger.LogError($"Error retrieving Article: {article.Error.Message}\n{article.Error.StackTrace}");
                     return StatusCode(
                         StatusCodes.Status500InternalServerError,
                         "There was an error retrieving Article."
@@ -73,7 +73,7 @@ namespace Stacked.API.Controllers
             }
             catch (FormatException ex)
             {
-                _logger.LogWarning($"There was a GUID format error for article {id}");
+                _logger.LogWarning($"There was a GUID format error for article {id}\n{ex.Message}\n{ex.StackTrace}");
                 return BadRequest(id);
             }
 

@@ -118,7 +118,7 @@ namespace Stacked.Services
 
                 var articleModel = _mapper.Map<ArticleDto>(article);
                 var author = await _users.GetFirstWhere(
-                    u => u.Id == article.Id,
+                    u => u.Id == article.AuthorId,
                     u => u.UpdatedOn
                 );
                 articleModel.AuthorName = author.UserName;

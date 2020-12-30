@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ using Microsoft.OpenApi.Models;
 using Stacked.Data;
 using Stacked.Services;
 using Stacked.Services.Interfaces;
+using Stacked.Services.Serialization;
 
 namespace Stacked.API
 {
@@ -23,8 +25,11 @@ namespace Stacked.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAutoMapper(c => c.AddProfile<EntityMappingProfile>(), typeof(Startup));
+
             services.AddDbContext<BlogDbContext>(opts
                 => opts.UseSqlServer(Configuration.GetConnectionString("stacked.dev")));
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
             services.AddTransient<IArticleService, ArticleService>();
 

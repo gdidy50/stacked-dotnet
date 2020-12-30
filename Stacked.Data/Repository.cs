@@ -17,7 +17,7 @@ namespace Stacked.Data
 
         public Repository(BlogDbContext db)
         {
-            _entities = _db.Set<T>();
+            _entities = db.Set<T>();
             _db = db;
         }
 
