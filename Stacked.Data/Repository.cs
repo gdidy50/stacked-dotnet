@@ -36,13 +36,18 @@ namespace Stacked.Data
         public async Task<T> GetById(Guid id) =>
             await _entities.SingleOrDefaultAsync(ent => ent.Id == id);
 
-        public async Task<T> GetFirstWhere<TOrder>(Expression<Func<T, bool>> whereExp, Expression<Func<T, TOrder>> orderByExp) =>
+        public async Task<T> GetFirstWhere<TOrder>(
+            Expression<Func<T, bool>> whereExp,
+            Expression<Func<T, TOrder>> orderByExp) =>
             await _entities
                 .Where(whereExp)
                 .OrderByDescending(orderByExp)
                 .FirstOrDefaultAsync();
 
-        public async Task<List<T>> GetAllWhere<TOrder>(Expression<Func<T, bool>> whereExp, Expression<Func<T, TOrder>> orderByExp, int limit = 100)
+        public async Task<List<T>> GetAllWhere<TOrder>(
+            Expression<Func<T, bool>> whereExp,
+            Expression<Func<T, TOrder>> orderByExp,
+            int limit = 100)
         {
             var entities = _entities
                                 .AsQueryable()
@@ -71,7 +76,10 @@ namespace Stacked.Data
             };
         }
 
-        public async Task<PaginationResult<T>> GetAll(int page, int perPage, Expression<Func<T, bool>> whereExp)
+        public async Task<PaginationResult<T>> GetAll(
+            int page,
+            int perPage,
+            Expression<Func<T, bool>> whereExp)
         {
             var count = await _entities.CountAsync();
             var entsToSkip = (page - 1) * perPage;
