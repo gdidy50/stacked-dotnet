@@ -1,4 +1,6 @@
 using AutoMapper;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +8,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Serialization;
+using Stacked.API.Middleware;
+using Stacked.API.Models;
+using Stacked.API.Validators;
 using Stacked.Data;
+using Stacked.Models;
 using Stacked.Services;
 using Stacked.Services.Interfaces;
 using Stacked.Services.Serialization;
@@ -33,7 +40,25 @@ namespace Stacked.API
 
             services.AddTransient<IArticleService, ArticleService>();
 
-            services.AddControllers();
+            services.AddTransient<IValidator<ArticleDto>, ArticleValidator>();
+            services.AddTransient<IValidator<TagDto>, TagValidator>();
+            services.AddTransient<IValidator<CommentDto>, CommentValidator>();
+            services.AddTransient<IValidator<UserDto>, UserValidator>();
+            services.AddTransient<IValidator<ManyArticlesRequest>, ManyArticlesRequestValidator>();
+            services.AddTransient<IValidator<ManyCommentsRequest>, ManyCommentsRequestValidator>();
+            services.AddTransient<IValidator<ManyTagsRequest>, ManyTagsRequestValidator>();
+            services.AddTransient<IValidator<ManyUsersRequest>, ManyUsersRequestValidator>();
+
+            // services.AddControllers();
+            services.AddMvc(opts => opts.Filters.Add<ValidationMiddleware>())
+                .AddNewtonsoftJson(opts =>
+                {
+                    opts.SerializerSettings.ContractResolver = new DefaultContractResolver
+                    {
+                        NamingStrategy = new CamelCaseNamingStrategy()
+                    };
+                })
+                .AddFluentValidation();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Stacked.API", Version = "v1" });
@@ -53,6 +78,12 @@ namespace Stacked.API
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors(builder => builder
+                                    .WithOrigins("http://localhost:8080")
+                                    .AllowAnyHeader()
+                                    .AllowAnyMethod()
+                                    .AllowCredentials());
 
             app.UseAuthorization();
 
