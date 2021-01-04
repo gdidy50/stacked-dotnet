@@ -159,9 +159,65 @@ namespace Stacked.Services
             }
         }
 
-        public async Task<ServiceResult<ArticleDto>> Update(Guid id, ArticleDto article)
+        public async Task<ServiceResult<ArticleDto>> Update(Guid articleId, ArticleDto articleDto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var articleToUpdate = await _articles.GetById(articleId);
+                articleToUpdate.Title = articleDto.Title;
+                articleToUpdate.Content = articleDto.Content;
+
+                if (articleToUpdate.ArticleTags != null)
+                {
+                    _logger.LogDebug($"Deleting existing ArticleTags for Article with id: {articleId}");
+                    foreach (var articleTagEntity in articleToUpdate.ArticleTags)
+                    {
+                        await _articleTags.Delete(articleTagEntity.Id);
+                    }
+                }
+
+                if (articleDto.Tags != null && articleDto.Tags.Count > 0)
+                {
+                    _logger.LogDebug($"Creating updated ArticleTags for Article with id: {articleId}");
+                    foreach (var newTag in articleDto.Tags)
+                    {
+                        var newTagGuid = Guid.Parse(newTag);
+                        var tag = await _tags.GetById(newTagGuid);
+
+                        var newArticleTag = new ArticleTag
+                        {
+                            Id = newTagGuid,
+                            CreatedOn = DateTime.UtcNow,
+                            UpdatedOn = DateTime.UtcNow,
+                            Article = articleToUpdate,
+                            Tag = tag
+                        };
+                        await _articleTags.Create(newArticleTag);
+                    }
+                }
+
+                var updatedArticle = await _articles.Update(articleToUpdate);
+                var articleResult = _mapper.Map<ArticleDto>(updatedArticle);
+
+                _logger.LogDebug($"Updated article with id: {articleId}");
+
+                return new ServiceResult<ArticleDto>
+                {
+                    IsSuccess = true,
+                    Data = articleResult,
+                    Error = null
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to update article: {ex}");
+                return new ServiceResult<ArticleDto>
+                {
+                    IsSuccess = false,
+                    Data = null,
+                    Error = new ServiceError { StackTrace = ex.StackTrace, Message = ex.Message }
+                };
+            }
         }
 
         public async Task<ServiceResult<Guid>> Create(ArticleDto articleDto)
@@ -226,7 +282,29 @@ namespace Stacked.Services
 
         public async Task<ServiceResult<Guid>> Delete(Guid id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _articles.Delete(id);
+
+                _logger.LogDebug($"Deleted article with id: {id}");
+
+                return new ServiceResult<Guid>
+                {
+                    IsSuccess = true,
+                    Data = id,
+                    Error = null
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to delete article: {ex}");
+                return new ServiceResult<Guid>
+                {
+                    IsSuccess = false,
+                    Data = id,
+                    Error = new ServiceError { StackTrace = ex.StackTrace, Message = ex.Message }
+                };
+            }
         }
     }
 }
